@@ -1,0 +1,53 @@
+# ekf.yaml  (OPTIONAL enhancement — not required for the basic drop-in)
+# ----------------------------------------------------------------------
+# Fuse wheel odometry (driver_node /odom) with IMU yaw rate to slow heading
+# drift. Run robot_localization's ekf_node + imu_filter_madgwick PER robot,
+# inside the robot_<id> namespace. The EKF then publishes the fused /odom and
+# the odom->base_link TF; point the planner at the fused topic.
+#
+# Pipeline per robot:
+#   driver_node  -> /robot_i/odom (wheel)         -> ekf input odom0
+#   driver_node  -> /robot_i/imu/data_raw         -> imu_filter_madgwick
+#   imu_filter   -> /robot_i/imu/data (with yaw)  -> ekf input imu0
+#   ekf_node     -> /robot_i/odometry/filtered    -> planner reads THIS
+#
+# If you enable the EKF, set driver_node publish_tf:=false (EKF owns the TF).
+
+ekf_node:
+  ros__parameters:
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # wheel odometry: trust x/y velocity + yaw rate, not absolute pose
+    odom0: odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+    odom0_differential: false
+    odom0_relative: false
+
+    # IMU: trust yaw rate (and yaw if imu_filter provides a good one)
+    imu0: imu/data
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]
+    imu0_differential: false
+    imu0_relative: false
+    imu0_remove_gravitational_acceleration: true
+
+imu_filter_madgwick:
+  ros__parameters:
+    use_mag: false
+    publish_tf: false
+    world_frame: "enu"
+    fixed_frame: "base_link"
+    orientation_stddev: 0.05

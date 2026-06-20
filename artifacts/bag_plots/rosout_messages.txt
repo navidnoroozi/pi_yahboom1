@@ -1,0 +1,18 @@
+     0.000 s  [INFO]  rosbag2_recorder: Press SPACE for pausing/resuming
+     0.000 s  [INFO]  rosbag2_recorder: Event publisher thread: Started
+     0.000 s  [INFO]  rosbag2_recorder: Starting recording to '/home/pi/robot_ws/src/robot_bringup/bags/robot_run'
+     0.000 s  [INFO]  rosbag2_recorder: Subscribed to topic '/rosout'
+     0.000 s  [INFO]  rosbag2_recorder: Listening for topics...
+     0.000 s  [INFO]  rosbag2_recorder: Recording...
+     0.000 s  [INFO]  rosbag2_recorder: Topics discovery started.
+     0.358 s  [INFO]  rosbag2_recorder: Subscribed to topic '/robot_description'
+     0.376 s  [INFO]  rosbag2_recorder: Subscribed to topic '/tf_static'
+     0.381 s  [INFO]  rosbag2_recorder: Subscribed to topic '/tf'
+     0.391 s  [INFO]  rosbag2_recorder: Subscribed to topic '/diagnostics'
+     0.399 s  [INFO]  rosbag2_recorder: Subscribed to topic '/imu/data'
+     0.409 s  [INFO]  rosbag2_recorder: Subscribed to topic '/odom'
+     0.413 s  [INFO]  rosbag2_recorder: Subscribed to topic '/odom/unfiltered'
+    15.624 s  [ERROR]  ekf_filter_node: Failed to meet update rate! Took 0.15535882000000000858seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+    16.445 s  [INFO]  rosbag2_recorder: Subscribed to topic '/cmd_vel'
+    16.445 s  [INFO]  rosbag2_recorder: All requested topics are subscribed. Stopping discovery...
+    16.445 s  [INFO]  rosbag2_recorder: Topics discovery stopped.

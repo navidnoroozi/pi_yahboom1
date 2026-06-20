@@ -1,0 +1,65 @@
+# robot_params.yaml
+# ------------------
+# Calibration parameters for ONE physical robot. Because motors/gearboxes vary
+# unit-to-unit, copy this to robot1.yaml ... robot4.yaml and calibrate EACH
+# robot with `calibrate_node`. The "/**" wildcard makes these apply to
+# driver_node regardless of the robot_<id> namespace.
+#
+# Values below marked (CALIBRATE) are PLACEHOLDERS — measure them first.
+#
+# CONTROL PATH: wheel-velocity closed loop runs ON THE FIRMWARE (STM32 PID,
+# app_pid.c), commanded via set_car_motion(). The Pi does NOT run its own
+# wheel PI loop — see driver_node.py docstring for why (FUNC_MOTOR/set_motor
+# is open-loop only; FUNC_MOTION/set_car_motion is the closed-loop path).
+
+/**:
+  ros__parameters:
+
+    # ── loop / safety ────────────────────────────────────────────────────────
+    control_rate_hz: 20.0      # >= the planner command rate (cfg.dt = 0.07 s ~14 Hz)
+    cmd_timeout_s: 0.5         # stop motors if no cmd_vel within this window
+
+    # ── calibrated kinematics — ODOMETRY ONLY (CALIBRATE per robot) ──────────
+    # The firmware does not report pose, only body velocity, so we still
+    # integrate x/y/theta on the Pi from raw encoder ticks. These two values
+    # are needed for THAT integration; they no longer feed a Pi-side PWM loop.
+    meters_per_tick: 0.0001    # (CALIBRATE) straight routine: distance / avg_ticks
+    wheel_separation_m: 0.170  # (CALIBRATE) spin routine: track width b
+    max_wheel_speed_ms: 0.70   # (CALIBRATE) maxspeed routine: informational / clamp ref only
+
+    # ── encoder port mapping (M2 + M4 per Yahboom wiring) ─────────────────────
+    # get_motor_encoder() -> (m1,m2,m3,m4) ; indices below pick L/R out of that.
+    left_encoder_index: 2
+    right_encoder_index: 4
+    # signs: verify with the `sign` routine, flip any that are wrong
+    left_encoder_sign: 1
+    right_encoder_sign: 1
+
+    # ── firmware car_type + closed-loop wheel PID (runs ON the STM32) ─────────
+    # CAR_FOURWHEEL (0x04): Fourwheel_Ctrl() mixes (Vx, Vz) into one left-side
+    # and one right-side wheel-speed target -- genuine diff-drive kinematics --
+    # and drives it through app_pid.c on all 4 PID channels. Only the wired
+    # channels (M2/M4) have real motors/encoders attached; the other two run
+    # harmlessly against a zero encoder.
+    car_type: 4
+    # Firmware defaults (app_pid.h: PID_DEF_KP/KI/KD) are usually fine to start.
+    # Set push_pid_gains: true and tune kp/ki/kd below only if wheel tracking
+    # is sluggish/oscillatory once you scope it (see DEPLOYMENT_GUIDE.md Phase 3).
+    push_pid_gains: false
+    wheel_pid_kp: 0.8
+    wheel_pid_ki: 0.06
+    wheel_pid_kd: 0.5
+    wheel_pid_forever: false   # true = burn to flash (slow, persists across reboot)
+
+    # ── cmd_vel sanity clamp ───────────────────────────────────────────────────
+    v_max: 1.0    # m/s  (set_car_motion input range for CAR_FOURWHEEL-style use)
+    w_max: 3.0    # rad/s
+
+    # ── frames / features ────────────────────────────────────────────────────
+    odom_frame: "odom"
+    base_frame: "base_link"     # set "robot_1/base_link" etc. if you want unique TF
+    imu_frame: "imu_link"
+    publish_tf: false           # sim publishes none; set true for rviz
+    publish_imu: true
+    publish_voltage: true
+    publish_diagnostics: true
